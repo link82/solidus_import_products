@@ -1,0 +1,28 @@
+es:
+  product_import_processing: "Gracias, su importación ha sido encolada para procesarse. Usted recibirá un mail de confirmación una vez se haya completado la importación."
+  product_import_imported: "Productos importados correctamente"
+  product_imports: "Importar Productos"
+  delete_product_import: "Borrar"
+  back_to_product_imports: "Volver al listado"
+  delete_product_import_successful: "La importación y los productos asociados se han borrado"
+  confirm_delete_product_import: "Al borrar esta importación, se borrarán todos los productos asociados. Está usted seguro?"
+  product_import_http_error: "Error al subir el fichero. Asegurese que el fichero está grabado como texto."
+  spree:
+    admin:
+      tab:
+        product_imports: "Importar Productos"
+    actions:
+      import: "Importar"
+  product_import:
+    state:
+      created: "Creado"
+      started: "En Progreso"
+      completed: "Completado"
+      failed: "Error"
+  form:
+    product_import:
+      separator_char: "Carácter separador"
+      heading: "Importar Productos desde CSV"
+      encoding: "Codificación"
+      new:
+        data_file: "Fichero de productos"

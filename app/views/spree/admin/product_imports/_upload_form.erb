@@ -1,0 +1,77 @@
+
+<div class="field">
+  <%= f.label :bundle_file_url, t('form.product_import.new.bundle_file_url') %><br>
+  <%= f.text_field :bundle_file_url, class: "js-signed-upload-value w-100", placeholder: t('form.product_import.new.url_placeholder'), readonly: true %>
+</div>
+<div class="field">
+  <input type="file" accept="application/zip" class="js-signed-upload" data-presign-url="<%= presign_upload_admin_product_imports_path %>" />
+  <a href='#' id='upload_bundle' class='btn btn-primary'><%= t('form.product_import.new.upload_archive') %></a>
+
+  <p class="js-signed-upload-status">
+  </p>
+</div>
+
+<script>
+var upload, uploadHandler, uploadWithUrl;
+
+var uploadWithUrl = function(form, file, presignedUrl, publicUrl) {
+  var submit, xhr,  totalSize;
+  $("#upload_bundle").addClass('disabled');
+  $('.js-signed-upload-status').text('Uploading...');
+  xhr = new XMLHttpRequest();
+  xhr.open('PUT', presignedUrl);
+  xhr.setRequestHeader('Content-Type', file.type);
+  //xhr.setRequestHeader('x-amz-acl', 'public-read');
+  //xhr.setRequestHeader('Content-Type', 'application/octet-stream');
+  totalSize = file.size;
+
+  xhr.upload.addEventListener('progress', function (e) {
+    if (e.loaded <= totalSize) {
+      var percent = Math.round(e.loaded / totalSize * 100);
+      $('.js-signed-upload-status').text('Uploading ' + percent + '% ...');
+    }
+  });
+
+  xhr.onload = function() {
+    $("#upload_bundle").removeClass('disabled');
+    $('#submit_btn').removeProp('disabled').removeClass('disabled');
+    if (xhr.status === 200) {
+      $('.js-signed-upload-value').val(publicUrl);
+      return $('.js-signed-upload-status').text('');
+    }
+  };
+  xhr.onerror = function() {
+    $("#upload_bundle").removeClass('disabled');
+    $('#submit_btn').removeProp('disabled').removeClass('disabled');
+    return $('.js-signed-upload-status').text('Failed to upload. Try uploading a smaller file.');
+  };
+  xhr.send(file);
+};
+
+upload = function(form, file, url) {
+  return $.ajax({
+    url: url + '?filename=' + file.name + '&filetype=' + file.type,
+    method: 'PUT',
+    accept: 'json'
+  }).success(function(data) {
+    return uploadWithUrl(form, file, data.presigned_url, data.public_url);
+  });
+};
+
+uploadHandler = function(field) {
+  var file, form;
+  file = field.files[0];
+  if (file === null) {
+    return;
+  }
+  form = $('#bundle_upload_form');
+  return upload(form, file, field.dataset.presignUrl);
+};
+
+$(function() {
+  return $('#upload_bundle').click(function() {
+    return uploadHandler($('.js-signed-upload')[0]);
+  });
+});
+
+</script>

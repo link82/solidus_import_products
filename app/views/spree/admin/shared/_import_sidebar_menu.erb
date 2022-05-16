@@ -1,0 +1,3 @@
+<% if can? :admin, Spree::ProductImport %>
+  <%= tab :product_imports, url: spree.admin_product_imports_url %>
+<% end %>
