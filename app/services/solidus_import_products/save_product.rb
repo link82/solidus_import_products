@@ -15,8 +15,10 @@ module SolidusImportProducts
 
       logger.log("SAVE PRODUCT: #{product.inspect}", :debug)
 
-      # Add sale prices if present
-      # product.prices << product.prices.new(amount: product.price.to_f, currency: 'EUR', country_iso: 'IT') if product.prices.empty?
+      if !product.valid? && ([:"prices.sale_prices", :"master.prices.sale_prices", :prices] & product.errors.keys).any?
+        product.save(validate: false)
+        product.reload
+      end
 
       unless product.valid?
         msg = "A product could not be imported - here is the information we have:\n" \
@@ -24,7 +26,6 @@ module SolidusImportProducts
         logger.log(msg, :error)
         raise SolidusImportProducts::Exception::ProductError, msg
       end
-
       product.save
       product.reload
 
@@ -54,7 +55,7 @@ module SolidusImportProducts
     protected
 
     def setup_product_sales(product, product_data)
-      return if product.price.nil? || product_data[:sale_price].nil?
+      return if product.price.nil? || product_data[:sale_price].blank?
 
       sale_price = product_data[:sale_price].to_f
       starts_at = product_data[:sale_price_start_at].blank? ? DateTime.now : product_data[:sale_price_start_at].to_date.beginning_of_day
