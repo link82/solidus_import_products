@@ -32,7 +32,11 @@ module SolidusImportProducts
 
 
           begin
-            next unless variant.save
+            if !variant.valid? && ([:"prices.sale_prices", :"master.prices.sale_prices", :prices] & variant.errors.keys).any?
+              variant.save(validate: false)
+              variant.reload
+            end
+            next unless variant.valid?
 
             product_information[:variant_images].each do |filename|
               find_and_attach_image_to(variant, filename)
@@ -41,6 +45,7 @@ module SolidusImportProducts
             stock_items
             logger.log("Variant of SKU #{variant.sku} successfully imported.\n", :debug)
           rescue StandardError => e
+            binding.pry
             message = "A variant could not be imported - here is the information we have:\n"
             message += "#{product_information}, #{variant.errors.full_messages.join(', ')}\n"
             message += e.message.to_s
