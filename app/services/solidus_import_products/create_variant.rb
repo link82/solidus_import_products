@@ -22,11 +22,14 @@ module SolidusImportProducts
       product_information[:variant_options][:taglia].split(',').map(&:strip).each do |size|
         product_information[:variant_options][:colore].split(',').map(&:strip).each do |color|
           v_sku = "#{product.master_sku}_#{color.upcase.strip}_#{size.upcase}"
-          load_or_initialize_variant v_sku
 
+          load_or_initialize_variant v_sku
 
           options('Taglia', size)
           options('Colore', color)
+
+
+
 
           product_information[:attributes].each { |attr_field, attr_value| variant.send("#{attr_field}=", attr_value) if variant.respond_to?("#{attr_field}=") }
 
@@ -45,7 +48,6 @@ module SolidusImportProducts
             stock_items
             logger.log("Variant of SKU #{variant.sku} successfully imported.\n", :debug)
           rescue StandardError => e
-            binding.pry
             message = "A variant could not be imported - here is the information we have:\n"
             message += "#{product_information}, #{variant.errors.full_messages.join(', ')}\n"
             message += e.message.to_s
