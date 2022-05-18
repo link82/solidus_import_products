@@ -12,10 +12,12 @@ module SolidusImportProducts
       self.product = args[:product]
 
       properties_hash.each do |field, value|
-        property = Spree::Property.where('lower(name) = ?', field).first
-        next unless property
+        property = Spree::Property.where(name: field.to_s.parameterize).first_or_initialize(name: field.to_s.parameterize, presentation: field.to_s.humanize)
+        next unless property.save
+
         product_property = Spree::ProductProperty.where(product_id: product.id, property_id: property.id).first_or_initialize
         product_property.value = value
+        binding.pry unless product_property.valid?
         product_property.save!
       end
     end
